@@ -1,0 +1,4 @@
+# Tells Railway's Nixpacks builder to install the Tesseract OCR system
+# package, which pytesseract needs (the photo-translate feature).
+[phases.setup]
+aptPkgs = ["tesseract-ocr"]

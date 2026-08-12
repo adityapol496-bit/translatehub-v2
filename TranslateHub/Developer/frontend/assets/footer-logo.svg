@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="40" height="40">
+  <!-- globe -->
+  <circle cx="30" cy="34" r="24" fill="#7FD1D9"/>
+  <path d="M10 24c4 4 7 2 10 5s2 7 6 8 5-3 9-1 3 6 8 5c3-1 4-4 6-5a24 24 0 0 1-39 6c-3-4-4-9-4-12 1-2 2-4 4-6z" fill="#B7E36B"/>
+  <path d="M22 12c2 3 1 6-1 8s-6 1-8 4c6-6 6-9 9-12z" fill="#B7E36B"/>
+
+  <!-- red bubble: A -->
+  <rect x="30" y="2" width="26" height="22" rx="6" fill="#DD4A56"/>
+  <path d="M43 20l-6 6v-6" fill="#DD4A56"/>
+  <text x="43" y="18" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">文</text>
+
+  <!-- cream bubble: A -->
+  <rect x="0" y="16" width="24" height="20" rx="6" fill="#F1EDE6"/>
+  <path d="M8 34l6 6v-6" fill="#F1EDE6"/>
+  <text x="12" y="32" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#8FCBD3" text-anchor="middle">A</text>
+
+  <!-- orange bubble: अ (Devanagari) -->
+  <rect x="26" y="34" width="24" height="20" rx="6" fill="#F5A93F"/>
+  <path d="M34 52l-6 6v-6" fill="#F5A93F"/>
+  <text x="38" y="50" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">अ</text>
+</svg>

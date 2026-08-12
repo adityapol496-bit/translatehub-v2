@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TranslateHub — Multilingual Translator</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+  <div class="brand">
+    <img src="assets/logo.svg" alt="TranslateHub logo" class="logo" />
+    <span class="brand-name">TranslateHub</span>
+  </div>
+
+  <nav class="nav-links">
+    <a href="#home" class="active">Home</a>
+    <a href="#" id="navHistory">History</a>
+    <a href="#" id="navProfile">Profile</a>
+    <a href="#about">About</a>
+  </nav>
+
+  <div class="topbar-actions">
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle theme">
+      <span id="themeIcon">🌙</span>
+    </button>
+    <button id="loginBtn" class="btn-primary">Login</button>
+  </div>
+</header>
+
+<!-- MAIN TRANSLATOR -->
+<main id="home" class="translator-wrap">
+
+  <div class="lang-bar">
+    <div class="lang-tabs" data-side="source">
+      <button class="tab active" data-lang="detect">Detect language</button>
+      <button class="tab" data-lang="en">English</button>
+      <button class="tab" data-lang="mr">Marathi</button>
+      <button class="tab" data-lang="hi">Hindi</button>
+      <button class="chevron-btn" data-side="source" title="More languages">⌄</button>
+    </div>
+
+    <button id="swapBtn" class="swap-btn" title="Swap languages">⇄</button>
+
+    <div class="lang-tabs" data-side="target">
+      <button class="tab active" data-lang="en">English</button>
+      <button class="tab" data-lang="mr">Marathi</button>
+      <button class="tab" data-lang="hi">Hindi</button>
+      <button class="chevron-btn" data-side="target" title="More languages">⌄</button>
+    </div>
+  </div>
+
+  <!-- Shared language dropdown (search + full list), opened by either chevron -->
+  <div id="langDropdown" class="lang-dropdown hidden">
+    <input type="text" id="langSearch" placeholder="Search language..." />
+    <ul id="langList"></ul>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <textarea id="sourceText" placeholder="Enter text here..."></textarea>
+      <div class="panel-actions">
+        <button title="Speak" class="icon-btn" id="micBtn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V20H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.08A7 7 0 0 0 19 11z"/></svg>
+        </button>
+        <button title="Copy" class="icon-btn" data-copy="sourceText">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1z"/><path d="M19 5H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+        </button>
+        <button title="Clear" class="icon-btn" id="clearBtn">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M6 7h12l-1 14H7L6 7zm3-4h6l1 2h4v2H4V5h4l1-2z"/></svg>
+        </button>
+        <button title="Translate from a photo (poster, sign, document)" class="icon-btn" id="photoTranslateBtn">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M9 2 7.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-3.17L15 2H9zm3 15a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+        </button>
+        <input type="file" id="photoTranslateInput" accept="image/*" class="hidden" />
+      </div>
+    </div>
+
+    <div class="panel">
+      <textarea id="targetText" placeholder="Translation" readonly></textarea>
+      <p id="targetTransliteration" class="translit-text hidden"></p>
+      <div class="panel-actions">
+        <button title="Listen" class="icon-btn" id="speakBtn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3z"/><path d="M16.5 12a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12z"/><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </button>
+        <button title="Copy" class="icon-btn" data-copy="targetText">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1z"/><path d="M19 5H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11v14z"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="translate-action">
+    <button id="translateBtn" class="btn-translate">🔤 Translate</button>
+  </div>
+</main>
+
+<!-- HERO: full suite of language tools -->
+<section class="hero-suite">
+  <div class="hero-suite-inner">
+    <h1>A full suite of language tools,<br />built to power your global voice</h1>
+    <p>Real-time translation, voice input, conversation history and a personal
+       profile — everything you need to communicate across languages, in one place.</p>
+    <div class="hero-cta">
+      <button class="btn-hero-primary" id="heroTryBtn">Try it now</button>
+      <button class="btn-hero-secondary" id="heroAboutBtn">Learn more</button>
+    </div>
+
+    <div class="hero-platform">
+      <h2>The TranslateHub platform</h2>
+      <div class="hero-cards">
+        <div class="hero-card">
+          <div class="hero-icon icon-blue">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <h3>Translator</h3>
+          <div class="hero-card-preview">
+            <span>Detect language</span>
+            <span class="hp-swap">⇄</span>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-icon icon-green">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V20H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.08A7 7 0 0 0 19 11z"/></svg>
+          </div>
+          <h3>Voice</h3>
+          <div class="hero-card-preview">
+            <span>Real-time translation</span>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-icon icon-purple">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M13 3a9 9 0 1 0 8.94 10H19.9A7 7 0 1 1 13 5v4l5-4.5L13 0v3z"/></svg>
+          </div>
+          <h3>History</h3>
+          <div class="hero-card-preview">
+            <span>Your past translations</span>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-icon icon-yellow">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-9 2.2-9 5v2h18v-2c0-2.8-4.6-5-9-5z"/></svg>
+          </div>
+          <h3>Profile</h3>
+          <div class="hero-card-preview">
+            <span>Save your preferences</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="translator-wrap">
+  <!-- ABOUT / FOOTER INFO -->
+  <section id="about" class="about-section">
+    <div class="about-intro">
+      <span class="eyebrow">About this</span>
+      <h2>TranslateHub</h2>
+      <p>
+        A multilingual real-time translation platform built to bridge language
+        gaps for customer support and educational use cases — powered by a
+        pre-trained translation model and automatic language detection.
+      </p>
+    </div>
+
+    <div class="about-features">
+      <div class="about-feature-card">
+        <div class="hero-icon icon-blue">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 2c1.5 0 2.9.4 4.1 1.1-.6.5-1.3.9-2.1 1.1a10.6 10.6 0 0 0-2-2.2zM8 6.5c-.8-.2-1.5-.6-2.1-1.1A6.9 6.9 0 0 1 8 4.3v2.2zM4.3 8c.6.7 1.4 1.2 2.3 1.5-.2.8-.3 1.6-.3 2.5H4A9 9 0 0 1 4.3 8zm2 8.5C5.4 15.8 4.6 15 4 14.1h2.3c0 .9.1 1.7.3 2.4zm.4-3.4c0-.9.1-1.7.3-2.5.9.2 1.8.3 2.7.3v2.2H6.7zm4.3 6.7c-1.3-1-2.4-2.3-3.1-3.8.8-.2 1.7-.3 2.6-.3.2 1.5.6 2.9 1.1 4.1H11zm1-4.3c-1.1 0-2.1-.1-3.1-.4.2-1 .5-1.9.9-2.7 1.1.4 2.2.6 3.4.7v2.4h-1.2zm0-4.4c-1 0-2-.2-2.9-.5.3-.8.7-1.5 1.2-2.1.5.9 1.1 1.8 1.7 2.6zm4.7 8.7c.5-1.2.9-2.6 1.1-4.1.9 0 1.8.1 2.6.3-.7 1.5-1.8 2.8-3.1 3.8h-.6zm.5-6.1c1.2-.1 2.3-.3 3.4-.7.4.8.7 1.7.9 2.7-1 .3-2 .4-3.1.4h-1.2v-2.4zm2-3.4c.6.6 1.2 1.3 1.7 2.1-.9.3-1.9.5-2.9.5.6-.8 1-1.7 1.2-2.6zM17.7 8c.5.9.9 1.9 1 3h-2.3c0-.9-.1-1.7-.3-2.5.9-.3 1.7-.7 1.6-.5z"/></svg>
+        </div>
+        <h3>Real-time Translation</h3>
+        <p>Type or paste text and get an instant translation between 100+ languages, with automatic source-language detection.</p>
+      </div>
+      <div class="about-feature-card">
+        <div class="hero-icon icon-green">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a1 1 0 0 0-2 0 5 5 0 0 1-10 0 1 1 0 0 0-2 0 7 7 0 0 0 6 6.92V20H9a1 1 0 0 0 0 2h6a1 1 0 0 0 0-2h-2v-2.08A7 7 0 0 0 19 11z"/></svg>
+        </div>
+        <h3>Voice Input</h3>
+        <p>Speak instead of typing — TranslateHub listens, transcribes, and translates your speech automatically.</p>
+      </div>
+      <div class="about-feature-card">
+        <div class="hero-icon icon-purple">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M13 3a9 9 0 1 0 8.94 10H19.9A7 7 0 1 1 13 5v4l5-4.5L13 0v3z"/></svg>
+        </div>
+        <h3>Conversation History</h3>
+        <p>Every translation you make is saved to your account, so you can revisit and reuse it anytime.</p>
+      </div>
+      <div class="about-feature-card">
+        <div class="hero-icon icon-yellow">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="#fff"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-9 2.2-9 5v2h18v-2c0-2.8-4.6-5-9-5z"/></svg>
+        </div>
+        <h3>Personal Profile</h3>
+        <p>Set your preferred language and photo once, and TranslateHub remembers it for you on every visit.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLORFUL LANGUAGE BANNER (like DeepL AI Labs section) -->
+  <section class="lang-banner">
+    <div class="lang-banner-text">
+      <h2>100+ Languages Supported</h2>
+      <p>From English and Marathi to Japanese and Arabic — TranslateHub understands
+         and translates over 100 languages in real time, so you can talk to anyone,
+         anywhere.</p>
+      <button class="btn-hero-primary" id="langBannerBtn">Try a translation</button>
+    </div>
+    <div class="lang-banner-graphic">
+      <span>अ</span><span>A</span><span>文</span><span>ا</span><span>Я</span><span>가</span>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer-dark">
+  <div class="footer-grid-dark">
+    <div class="footer-col-dark">
+      <h3 class="footer-brand-dark">
+        <img src="assets/logo.svg" alt="TranslateHub" class="footer-brand-icon" /> TranslateHub
+      </h3>
+      <p class="footer-desc-dark">
+        Real-time translation platform built with Django, JavaScript and a
+        pre-trained translation engine — supporting voice input, history and
+        100+ languages.
+      </p>
+      <p class="footer-contact-row">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#3B6BFF"><path d="M2 4h20v16H2V4zm2 2v.01L12 12l8-5.99V6H4zm16 2.24-7.4 5.55a1 1 0 0 1-1.2 0L4 8.24V18h16V8.24z"/></svg>
+        your.email@example.com
+      </p>
+      <p class="footer-contact-row">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#3B6BFF"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24 11.3 11.3 0 0 0 3.57.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.24.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z"/></svg>
+        +91 00000 00000
+      </p>
+      <p class="footer-contact-row">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#3B6BFF"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+        Your City, Maharashtra, India
+      </p>
+
+      <a href="#" id="footerSendMessage" class="btn-footer-message">Send Message</a>
+    </div>
+
+    <div class="footer-col-dark">
+      <h3 class="footer-heading-dark">Quick Links</h3>
+      <a href="#home" class="footer-link-dark">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#3B6BFF"><path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+        Home
+      </a>
+      <a href="#about" class="footer-link-dark">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#3B6BFF"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        About
+      </a>
+      <a href="#" id="footerLoginDark" class="footer-link-dark">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#3B6BFF"><path d="M11 7 9.6 8.4 12.2 11H3v2h9.2l-2.6 2.6L11 17l5-5-5-5zm7-2h-6v2h6v10h-6v2h6a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/></svg>
+        Login
+      </a>
+      <a href="#" id="footerHistory" class="footer-link-dark">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#3B6BFF"><path d="M13 3a9 9 0 1 0 8.94 10H19.9A7 7 0 1 1 13 5v4l5-4.5L13 0v3z"/></svg>
+        History
+      </a>
+      <a href="#" id="footerProfile" class="footer-link-dark">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#3B6BFF"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-9 2.2-9 5v2h18v-2c0-2.8-4.6-5-9-5z"/></svg>
+        Profile
+      </a>
+    </div>
+
+    <div class="footer-col-dark">
+      <h3 class="footer-heading-dark">
+        <span class="footer-heading-icon-svg">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#3B6BFF" d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9z"/><path fill="#1E3FBF" d="M12 13.5c-4 0-8 2-8 5v1.5h16V18.5c0-3-4-5-8-5z"/></svg>
+        </span>
+        Developed By
+      </h3>
+
+      <div class="dev-card">
+        <div class="dev-avatar">👨‍💻</div>
+        <div class="dev-info">
+          <span class="dev-name">Akshay Pawar</span>
+          <span class="dev-role">Full Stack Developer</span>
+          <div class="dev-social">
+            <a href="https://github.com/yourusername" target="_blank" title="GitHub" class="social-github">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.02 3.26 9.28 7.79 10.79.57.1.78-.25.78-.55v-2.15c-3.17.69-3.84-1.36-3.84-1.36-.52-1.3-1.27-1.65-1.27-1.65-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.53-2.53-.29-5.19-1.27-5.19-5.63 0-1.24.44-2.26 1.17-3.05-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.15 1.16a10.9 10.9 0 0 1 5.74 0c2.19-1.47 3.15-1.16 3.15-1.16.62 1.57.23 2.73.11 3.02.73.79 1.17 1.81 1.17 3.05 0 4.37-2.67 5.33-5.21 5.62.41.36.77 1.06.77 2.15v3.19c0 .3.21.66.79.55A10.53 10.53 0 0 0 23.5 12.02C23.5 5.74 18.27.5 12 .5z"/></svg>
+            </a>
+            <a href="https://linkedin.com/in/yourusername" target="_blank" title="LinkedIn" class="social-linkedin">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.45-2.14 2.94v5.66H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
+            </a>
+            <a href="mailto:your.email@example.com" title="Email" class="social-email">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M2 4h20v16H2V4zm2 2v.01L12 12l8-5.99V6H4zm16 2.24-7.4 5.55a1 1 0 0 1-1.2 0L4 8.24V18h16V8.24z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="dev-card">
+        <div class="dev-avatar">👩‍💻</div>
+        <div class="dev-info">
+          <span class="dev-name">Aditya Pol</span>
+          <span class="dev-role">AI / ML Developer</span>
+          <div class="dev-social">
+            <a href="https://github.com/yourusername2" target="_blank" title="GitHub" class="social-github">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.02 3.26 9.28 7.79 10.79.57.1.78-.25.78-.55v-2.15c-3.17.69-3.84-1.36-3.84-1.36-.52-1.3-1.27-1.65-1.27-1.65-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.53-2.53-.29-5.19-1.27-5.19-5.63 0-1.24.44-2.26 1.17-3.05-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.15 1.16a10.9 10.9 0 0 1 5.74 0c2.19-1.47 3.15-1.16 3.15-1.16.62 1.57.23 2.73.11 3.02.73.79 1.17 1.81 1.17 3.05 0 4.37-2.67 5.33-5.21 5.62.41.36.77 1.06.77 2.15v3.19c0 .3.21.66.79.55A10.53 10.53 0 0 0 23.5 12.02C23.5 5.74 18.27.5 12 .5z"/></svg>
+            </a>
+            <a href="https://linkedin.com/in/yourusername2" target="_blank" title="LinkedIn" class="social-linkedin">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.45-2.14 2.94v5.66H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
+            </a>
+            <a href="mailto:teammate.email@example.com" title="Email" class="social-email">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M2 4h20v16H2V4zm2 2v.01L12 12l8-5.99V6H4zm16 2.24-7.4 5.55a1 1 0 0 1-1.2 0L4 8.24V18h16V8.24z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-bottom-dark">
+    <p>© 2026 TranslateHub. All Rights Reserved.</p>
+  </div>
+</footer>
+
+<!-- LOGIN MODAL -->
+<!-- HISTORY MODAL -->
+<div id="historyModal" class="modal-overlay hidden">
+  <div class="modal wide">
+    <button class="modal-close" data-close="historyModal">✕</button>
+    <h2>Translation History</h2>
+    <div id="historyList" class="history-list">
+      <p class="empty-msg">No translations yet — try translating something first.</p>
+    </div>
+    <button id="clearHistoryBtn" class="btn-primary full">Clear History</button>
+  </div>
+</div>
+
+<!-- PROFILE MODAL (also handles login — one combined account page) -->
+<div id="profileModal" class="modal-overlay hidden fullpage-modal">
+  <div class="modal profile-card">
+    <button class="modal-close" data-close="profileModal">✕</button>
+
+    <!-- LOGIN / SIGNUP VIEW (shown when logged out) -->
+    <div id="profileLoginView" class="hidden">
+      <h2 id="authModalTitle" class="auth-welcome-title">Welcome to <span>TranslateHub</span></h2>
+      <p class="modal-subtitle" id="authModalSubtitle">Login to continue your translation journey.</p>
+      <p id="authError" class="auth-error hidden"></p>
+
+      <form id="loginForm">
+        <label id="nameFieldWrap" class="hidden auth-field">
+          <input type="text" id="authName" placeholder="Enter Name" />
+          <span class="auth-field-icon">👤</span>
+        </label>
+        <label class="auth-field">
+          <input type="email" id="authEmail" placeholder="Enter Email" required />
+          <span class="auth-field-icon">✉️</span>
+        </label>
+        <label class="auth-field">
+          <input type="password" id="authPassword" placeholder="Enter Password" required />
+          <span class="auth-field-icon auth-password-toggle" id="authPasswordToggle" title="Show/hide password">👁️</span>
+        </label>
+
+        <div class="auth-row">
+          <label class="auth-remember">
+            <input type="checkbox" id="authRememberMe" /> Remember Me
+          </label>
+          <a href="#" class="forgot-link" id="forgotPasswordLink">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-primary full auth-gradient-btn" id="authSubmitBtn">→ Login</button>
+      </form>
+
+      <div class="divider"><span>OR</span></div>
+
+      <div class="auth-social-grid">
+        <button type="button" class="social-tile" id="githubLoginBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.02 3.26 9.28 7.79 10.79.57.1.78-.25.78-.55v-2.15c-3.17.69-3.84-1.36-3.84-1.36-.52-1.3-1.27-1.65-1.27-1.65-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.68 1.24 3.33.95.1-.74.4-1.24.72-1.53-2.53-.29-5.19-1.27-5.19-5.63 0-1.24.44-2.26 1.17-3.05-.12-.29-.51-1.45.11-3.02 0 0 .96-.31 3.15 1.16a10.9 10.9 0 0 1 5.74 0c2.19-1.47 3.15-1.16 3.15-1.16.62 1.57.23 2.73.11 3.02.73.79 1.17 1.81 1.17 3.05 0 4.37-2.67 5.33-5.21 5.62.41.36.77 1.06.77 2.15v3.19c0 .3.21.66.79.55A10.53 10.53 0 0 0 23.5 12.02C23.5 5.74 18.27.5 12 .5z"/></svg>
+          GitHub
+        </button>
+        <button type="button" class="social-tile" id="linkedinLoginBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="#0a66c2"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.45-2.14 2.94v5.66H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0z"/></svg>
+          LinkedIn
+        </button>
+        <div class="social-tile google-btn-wrap">
+          <button type="button" class="social-tile-inner">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="#4285F4" d="M23.5 12.27c0-.85-.08-1.66-.22-2.45H12v4.63h6.46c-.28 1.5-1.13 2.77-2.4 3.62v3h3.88c2.27-2.09 3.56-5.17 3.56-8.8z"/><path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.93l-3.88-3c-1.08.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.71-4.94H1.28v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.29 14.28A7.2 7.2 0 0 1 4.91 12c0-.79.14-1.56.38-2.28v-3.1H1.28A12 12 0 0 0 0 12c0 1.94.46 3.77 1.28 5.38l4.01-3.1z"/><path fill="#EA4335" d="M12 4.77c1.76 0 3.34.6 4.58 1.79l3.44-3.44C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.28 6.62l4.01 3.1c.94-2.83 3.59-4.95 6.71-4.95z"/></svg>
+            Google
+          </button>
+          <div id="googleRealBtn" class="google-real-btn"></div>
+        </div>
+        <button type="button" class="social-tile" id="facebookLoginBtn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="#1877F2"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.7 4.53-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+          Facebook
+        </button>
+      </div>
+
+      <p class="auth-toggle">
+        <span id="authToggleText">Don't have account?</span>
+        <a href="#" id="authToggleLink">Register Now</a>
+      </p>
+    </div>
+
+    <!-- FORGOT PASSWORD VIEW -->
+    <div id="profileForgotView" class="hidden">
+      <div class="forgot-icon-circle">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M12 2 4 5v6c0 5.25 3.4 9.86 8 11 4.6-1.14 8-5.75 8-11V5l-8-3zm0 5.5c.83 0 1.5.67 1.5 1.5 0 .55-.3 1.03-.75 1.29V13a.75.75 0 0 1-1.5 0v-2.71A1.5 1.5 0 0 1 12 7.5z"/></svg>
+      </div>
+      <h2 class="auth-welcome-title">Forgot Password</h2>
+      <p class="modal-subtitle">Enter your registered email address.<br />We'll send you a One Time Password (OTP).</p>
+      <p id="forgotError" class="auth-error hidden"></p>
+      <p id="forgotSuccess" class="auth-success hidden"></p>
+
+      <form id="forgotPasswordForm">
+        <label class="auth-labeled-field">
+          <span class="auth-field-label">Email Address</span>
+          <input type="email" id="forgotEmail" placeholder="Enter your Email" required />
+        </label>
+        <button type="submit" class="btn-primary full auth-gradient-btn" id="forgotSubmitBtn">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M2 21 23 12 2 3v7l15 2-15 2z"/></svg>
+          Send OTP
+        </button>
+      </form>
+
+      <p class="auth-toggle">
+        <a href="#" id="backToLoginLink">← Back to Login</a>
+      </p>
+    </div>
+
+    <!-- VERIFY OTP VIEW -->
+    <div id="profileOtpView" class="hidden">
+      <div class="forgot-icon-circle">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      </div>
+      <h2 class="auth-welcome-title">Verify OTP</h2>
+      <p class="modal-subtitle">Enter the 6-digit verification code sent to<br />your registered email address.</p>
+      <p id="otpError" class="auth-error hidden"></p>
+
+      <form id="otpForm">
+        <label class="auth-labeled-field">
+          <input type="text" id="otpInput" class="otp-input-field" placeholder="Enter 6-Digit OTP" maxlength="6" inputmode="numeric" required />
+        </label>
+        <button type="submit" class="btn-primary full auth-gradient-btn" id="otpSubmitBtn">Verify OTP</button>
+      </form>
+
+      <p class="auth-toggle">
+        <a href="#" id="backToForgotLink">← Back</a>
+      </p>
+    </div>
+
+    <!-- NEW PASSWORD VIEW -->
+    <div id="profileResetView" class="hidden">
+      <div class="forgot-icon-circle">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5zm0 2a3 3 0 0 1 3 3v3H9V6a3 3 0 0 1 3-3zm0 10a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>
+      </div>
+      <h2 class="auth-welcome-title">Set New Password</h2>
+      <p class="modal-subtitle">Create a new password for your account.</p>
+      <p id="resetError" class="auth-error hidden"></p>
+
+      <form id="resetPasswordForm">
+        <label class="auth-labeled-field">
+          <span class="auth-field-label">New Password</span>
+          <input type="password" id="newPassword" placeholder="Enter new password" required />
+        </label>
+        <label class="auth-labeled-field">
+          <span class="auth-field-label">Confirm Password</span>
+          <input type="password" id="confirmPassword" placeholder="Re-enter new password" required />
+        </label>
+        <button type="submit" class="btn-primary full auth-gradient-btn" id="resetSubmitBtn">Reset Password</button>
+      </form>
+    </div>
+
+    <!-- MENU VIEW -->
+    <div id="profileMenuView" class="hidden">
+      <div class="profile-hero-plain">
+        <div class="profile-hero-banner"></div>
+        <div class="avatar-upload-wrap">
+          <div class="auth-avatar" id="profileAvatar">?</div>
+          <label for="profilePhotoInput" class="avatar-edit-btn" title="Change photo">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+          </label>
+          <input type="file" id="profilePhotoInput" accept="image/*" class="hidden" />
+        </div>
+        <h2 class="auth-welcome-title profile-welcome-title">Welcome back, <span id="profileDisplayName">Your Name</span></h2>
+        <p class="modal-subtitle" id="profileDisplayEmailSub">you@example.com</p>
+      </div>
+
+      <div class="profile-info-rows">
+        <div class="profile-info-row">
+          <span class="profile-info-label"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z"/></svg>Phone</span>
+          <span id="profileDisplayPhone">—</span>
+        </div>
+        <div class="profile-info-row">
+          <span class="profile-info-label"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="m4 6 8 7 8-7"/></svg>Mail</span>
+          <span id="profileDisplayEmail">you@example.com</span>
+        </div>
+      </div>
+
+      <div class="profile-menu-list">
+        <button type="button" class="profile-menu-item" id="openProfileDetailsBtn">
+          <span class="profile-menu-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <span class="profile-menu-label">Profile details</span>
+          <span class="profile-menu-arrow">›</span>
+        </button>
+        <button type="button" class="profile-menu-item" id="openProfileSettingsBtn">
+          <span class="profile-menu-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="profile-menu-label">Settings</span>
+          <span class="profile-menu-arrow">›</span>
+        </button>
+        <button type="button" class="profile-menu-item profile-menu-danger" id="profileLogoutBtn">
+          <span class="profile-menu-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg></span>
+          <span class="profile-menu-label">Log out</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PROFILE DETAILS (edit name / phone / photo) -->
+    <div id="profileDetailsView" class="hidden">
+      <button type="button" class="profile-back-btn" data-back="profileMenuView">‹ Back</button>
+      <form id="profileForm">
+        <div class="ga-section" style="border-top:none; margin-top:0; padding-top:0;">
+          <span class="ga-section-title">Personal info</span>
+          <label>Name
+            <input type="text" id="profileName" placeholder="Your name" />
+          </label>
+          <label>Email
+            <input type="email" id="profileEmail" placeholder="you@example.com" readonly />
+          </label>
+          <label>Phone
+            <input type="text" id="profilePhone" placeholder="+91 00000 00000" />
+          </label>
+        </div>
+        <button type="submit" class="btn-primary full">Save Profile</button>
+      </form>
+    </div>
+
+    <!-- SETTINGS (preferred language) -->
+    <div id="profileSettingsView" class="hidden">
+      <button type="button" class="profile-back-btn" data-back="profileMenuView">‹ Back</button>
+      <div class="ga-section" style="border-top:none; margin-top:0; padding-top:0;">
+        <span class="ga-section-title">Preferences</span>
+        <label>Preferred Language
+          <select id="profilePrefLang">
+            <option value="en">English</option>
+            <option value="mr">Marathi</option>
+            <option value="hi">Hindi</option>
+          </select>
+        </label>
+      </div>
+      <button type="button" id="saveSettingsBtn" class="btn-primary full">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
