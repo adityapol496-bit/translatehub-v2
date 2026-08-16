@@ -248,7 +248,7 @@ document.getElementById("swapBtn").addEventListener("click", () => {
 });
 
 // ---------- TRANSLATE (connects to your backend API) ----------
-const API_BASE_URL = "https://translatehub-backend-v2.onrender.comapi"; // change to your Django backend URL
+const API_BASE_URL = "https://translatehub-backend-v2.onrender.com/api"; // change to your Django backend URL
 
 // ---------- GOOGLE SIGN-IN ----------
 // Get this from Google Cloud Console → APIs & Services → Credentials
