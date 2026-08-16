@@ -1286,3 +1286,13 @@ body {
   .swap-btn { align-self: center; }
   .lang-dropdown { right: 12px; left: 12px; width: auto; }
 }
+@media (max-width: 720px) {
+  .lang-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+  }
+  .lang-tabs .tab {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+}
